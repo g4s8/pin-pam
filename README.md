@@ -3,6 +3,8 @@
 PIN-PAM is PAM authentication module uses 4-digits PIN code.
 Could be used for 2FA for PAM, e.g. sudo with face-recognition + 4-digits PIN code.
 
+[![CI](https://github.com/g4s8/pin-pam/actions/workflows/build.yml/badge.svg)](https://github.com/g4s8/pin-pam/actions/workflows/build.yml)
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
@@ -23,6 +25,14 @@ $ sudo xbps-install -S pin-pam
 ```
 
 ### FROM SOURCE
+
+Install dependencies (Ubuntu):
+```bash
+sudo apt-get update
+sudo apt-get install -y build-essential libpam0g-dev libssl-dev
+```
+
+Build:
 
  1. Clone repository
  2. Build with `make`

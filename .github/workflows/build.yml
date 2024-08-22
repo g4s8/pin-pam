@@ -1,0 +1,19 @@
+name: CI
+"on":
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libpam0g-dev libssl-dev
+    - name: Make
+      run: make
+    - name: Check
+      run: ./bin/ppedit --version

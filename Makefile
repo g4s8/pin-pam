@@ -6,8 +6,8 @@ VERSION := 0.0.1-local
 CC = gcc
 CFLAGS := -Wall -Iinclude -lcrypto -DBUILD_VERSION=\"$(VERSION)\"
 PAM_CFLAGS = $(CFLAGS) -fPIC -fno-stack-protector
-PAM_LDFLAGS = -shared
-PAM_LIBS = -lpam -lcrypto
+LDFLAGS = -lcrypto
+PAM_LDFLAGS := $(LDFLAGS) -lpam -shared
 
 # Directories
 SRCDIR = src
@@ -34,13 +34,13 @@ all: $(TARGETS)
 # Targets for executables
 $(BINDIR)/ppedit: $(LIBS) $(BUILDDIR)/ppedit.o
 	mkdir -p $(BINDIR)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 
 # Target for PAM module
 $(PAMOUTDIR)/pam_pin.so: $(LIBS) $(BUILDDIR)/pam_pin.o
 	mkdir -p $(PAMOUTDIR)
-	$(CC) $(PAM_LDFLAGS) -o $@ $^ $(PAM_LIBS)
+	$(CC) -o $@ $^ $(PAM_LDFLAGS)
 
 # Compile library sources
 $(BUILDDIR)/%.o: $(LIBDIR)/%.c

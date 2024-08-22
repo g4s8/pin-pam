@@ -33,6 +33,7 @@ all: $(TARGETS)
 
 # Targets for executables
 $(BINDIR)/ppedit: $(LIBS) $(BUILDDIR)/ppedit.o
+	mkdir -p $(BINDIR)
 	$(CC) $(CFLAGS) -o $@ $^
 
 

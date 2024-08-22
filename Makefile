@@ -39,6 +39,7 @@ $(BINDIR)/ppedit: $(LIBS) $(BUILDDIR)/ppedit.o
 
 # Target for PAM module
 $(PAMOUTDIR)/pam_pin.so: $(LIBS) $(BUILDDIR)/pam_pin.o
+	mkdir -p $(PAMOUTDIR)
 	$(CC) $(PAM_LDFLAGS) -o $@ $^ $(PAM_LIBS)
 
 # Compile library sources

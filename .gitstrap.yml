@@ -1,0 +1,12 @@
+version: v2
+kind: Repository
+metadata:
+    name: pin-pam
+spec:
+    description: PIN-PAM is a PIN code PAM authentication module ant tools.
+    defaultBranch: master
+    mergeStrategy:
+        - merge
+    deleteBranchOnMerge: true
+    license: MIT
+    visibility: public

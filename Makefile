@@ -6,16 +6,21 @@ VERSION := 0.0.1-local
 CC = gcc
 
 # Main build flags
-CFLAGS := -Wall -Iinclude -lcrypto -DBUILD_VERSION=\"$(VERSION)\"
-LDFLAGS = -lcrypto
+DEFINES = -DBUILD_VERSION=\"$(VERSION)\"
+
+CFLAGS =
+LDFLAGS =
+
+BUILD_CFLAGS := $(CFLAGS) -Wall -Iinclude $(DEFINES)
+BUILD_LDFLAGS := $(LDFLAGS) -lcrypto
 
 # PAM module build flags
-PAM_CFLAGS = $(CFLAGS) -fPIC -fno-stack-protector
-PAM_LDFLAGS := $(LDFLAGS) -lpam -shared
+PAM_CFLAGS = -Wall -Iinclude -lcrypto -fPIC -fno-stack-protector
+PAM_LDFLAGS := -shared -lcrypto -lpam
 
 # Test build flags
-TEST_CFLAGS := -Wall -Iinclude -I/usr/include
-TEST_LDFLAGS := -lcmocka $(LDFLAGS)
+TEST_CFLAGS := $(CFLAGS) -Wall -Iinclude $(DEFINES)
+TEST_LDFLAGS := $(LDFLAGS) -lcmocka -lcrypto
 
 # Directories
 SRCDIR = src
@@ -48,7 +53,7 @@ test: $(TEST_TARGET)
 # Targets for executables
 $(BINDIR)/ppedit: $(LIBS) $(BUILDDIR)/ppedit.o
 	@mkdir -p $(BINDIR)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CC) $(BUILD_CFLAGS) -o $@ $^ $(BUILD_LDFLAGS)
 
 # Target for PAM module
 $(PAMOUTDIR)/pam_pin.so: $(LIBS) $(BUILDDIR)/pam_pin.o
@@ -58,12 +63,12 @@ $(PAMOUTDIR)/pam_pin.so: $(LIBS) $(BUILDDIR)/pam_pin.o
 # Compile library sources
 $(BUILDDIR)/%.o: $(LIBDIR)/%.c
 	@mkdir -p $(BUILDDIR)
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(BUILD_CFLAGS) -c -o $@ $<
 
 # Compile source files
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c
 	@mkdir -p $(BUILDDIR)
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(BUILD_CFLAGS) -c -o $@ $<
 
 # Compile PAM module sources
 $(BUILDDIR)/pam_pin.o: $(PAMDIR)/pinpam.c

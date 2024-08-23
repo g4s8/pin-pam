@@ -70,7 +70,12 @@ int users_load(users_t *storage, const char* filepath) {
         FILE *file = fopen(filepath, "r");
         if (file == NULL) {
                 switch (errno) {
-                        ERRORS_CASE(ENOENT, ERR_USERS_NOT_FOUND);
+                        case ENOENT:
+                                // file not found - no error
+                                storage->ucap = 0;
+                                storage->ulen = 0;
+                                return 0;
+
                         ERRORS_CASE(EACCES, ERR_USERS_ACCES);
                         ERRORS_DEFAULT(ERR_USERS_OPEN);
                 }
@@ -95,6 +100,7 @@ int users_load(users_t *storage, const char* filepath) {
 
                 err = users_add(storage, username, pin_hash, true);
                 if (err != 0) {
+                        free(username);
                         break;
                 }
         }
@@ -292,6 +298,16 @@ int user_print(FILE *out, user_t *user, user_print_fmt format) {
                 }
         }
         return 0;
+}
+
+const char* user_get_name(user_t *user) {
+        size_t namelen = strlen(user->username);
+        char *name = malloc(namelen + 1);
+        if (name == NULL) {
+                return NULL;
+        }
+        strcpy(name, user->username);
+        return name;
 }
 
 bool user_check_pin(user_t *user, pin_hash_t pin_hash) {

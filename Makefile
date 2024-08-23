@@ -4,18 +4,28 @@
 # Compiler and flags
 VERSION := 0.0.1-local
 CC = gcc
+
+# Main build flags
 CFLAGS := -Wall -Iinclude -lcrypto -DBUILD_VERSION=\"$(VERSION)\"
-PAM_CFLAGS = $(CFLAGS) -fPIC -fno-stack-protector
 LDFLAGS = -lcrypto
+
+# PAM module build flags
+PAM_CFLAGS = $(CFLAGS) -fPIC -fno-stack-protector
 PAM_LDFLAGS := $(LDFLAGS) -lpam -shared
+
+# Test build flags
+TEST_CFLAGS := -Wall -Iinclude -I/usr/include
+TEST_LDFLAGS := -lcmocka $(LDFLAGS)
 
 # Directories
 SRCDIR = src
 LIBDIR = $(SRCDIR)/lib
 PAMDIR = $(SRCDIR)/pam
+TESTDIR = test
 BINDIR = bin
 PAMOUTDIR = pam
 BUILDDIR = build
+TESTBUILDDIR = $(BUILDDIR)/test
 
 # Install
 BIN_DEST = /usr/bin/
@@ -26,39 +36,61 @@ LIBS = $(BUILDDIR)/users.o $(BUILDDIR)/crypt.o $(BUILDDIR)/state.o
 
 # Targets
 TARGETS = $(BINDIR)/ppedit $(PAMOUTDIR)/pam_pin.so
+TEST_TARGET = $(TESTBUILDDIR)/test_main
 
-.PHONY: all clean
+.PHONY: all clean test
 
 all: $(TARGETS)
 
+test: $(TEST_TARGET)
+	./build/test/test_main
+
 # Targets for executables
 $(BINDIR)/ppedit: $(LIBS) $(BUILDDIR)/ppedit.o
-	mkdir -p $(BINDIR)
+	@mkdir -p $(BINDIR)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
-
 
 # Target for PAM module
 $(PAMOUTDIR)/pam_pin.so: $(LIBS) $(BUILDDIR)/pam_pin.o
-	mkdir -p $(PAMOUTDIR)
+	@mkdir -p $(PAMOUTDIR)
 	$(CC) -o $@ $^ $(PAM_LDFLAGS)
 
 # Compile library sources
 $(BUILDDIR)/%.o: $(LIBDIR)/%.c
-	mkdir -p $(BUILDDIR)
+	@mkdir -p $(BUILDDIR)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 # Compile source files
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c
-	mkdir -p $(BUILDDIR)
+	@mkdir -p $(BUILDDIR)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 # Compile PAM module sources
 $(BUILDDIR)/pam_pin.o: $(PAMDIR)/pinpam.c
-	mkdir -p $(BUILDDIR)
+	@mkdir -p $(BUILDDIR)
 	$(CC) $(PAM_CFLAGS) -c -o $@ $<
 
+# Test targets
+$(TESTBUILDDIR)/%.o: $(TESTDIR)/%.c
+	@mkdir -p $(TESTBUILDDIR)
+	$(CC) $(TEST_CFLAGS) -c -o $@ $<
+
+$(TEST_TARGET): $(TESTBUILDDIR)/test_main.o $(TESTBUILDDIR)/users.o $(TESTBUILDDIR)/crypt.o $(LIBS)
+	@mkdir -p $(TESTBUILDDIR)
+	$(CC) $(TEST_CFLAGS) -o $@ $^ $(TEST_LDFLAGS)
+
+# Compile test sources
+$(TESTBUILDDIR)/test_main.o: $(TESTDIR)/test_main.c
+	@mkdir -p $(TESTBUILDDIR)
+	$(CC) $(TEST_CFLAGS) -c -o $@ $<
+
+$(TESTBUILDDIR)/users.o: $(TESTDIR)/users.c
+	@mkdir -p $(TESTBUILDDIR)
+	$(CC) $(TEST_CFLAGS) -c -o $@ $<
+
+.PHONY: clean
 clean:
-	rm -f $(BUILDDIR)/*.o $(BINDIR)/* $(PAMOUTDIR)/*
+	rm -f $(BUILDDIR)/*.o $(BINDIR)/* $(PAMOUTDIR)/* $(TESTBUILDDIR)/*
 
 # Check UID (root)
 .PHONY: check-root
@@ -95,3 +127,4 @@ install: check-root create-files install-binaries
 .PHONY: license
 license:
 	@cat LICENSE
+

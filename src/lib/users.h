@@ -70,4 +70,6 @@ int user_print(FILE *out, user_t *user, user_print_fmt format);
 
 bool user_check_pin(user_t *user, pin_hash_t pin_hash);
 
+const char* user_get_name(user_t *user);
+
 #endif

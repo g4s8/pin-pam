@@ -6,8 +6,7 @@
 #ifndef _GLOBAL_CONFIG_H
 #define _GLOBAL_CONFIG_H
 
-/*
 #define ETC_USERS_PATH "/etc/pinpam/users"
 #define VAR_USERS_PATH "/var/pinpam/users"
-*/
+
 #endif
